@@ -1,0 +1,40 @@
+---
+
+- name: Debian | Install packages
+  apt: >
+    name={{ item }}
+    state=installed
+  with_items: apache_packages
+
+- name: Debian | Main configuration
+  template: >
+    src="apache24.conf.j2"
+    dest="{{ apache_server_root }}/{{ apache_daemon }}.conf"
+  notify: Restart Apache
+
+- name: Debian | Supplemental configuration - ports.conf
+  template: >
+    src="ports.conf.j2"
+    dest="{{ apache_server_root }}/ports.conf"
+  notify: Restart Apache
+
+- name: Debian | Supplemental configuration - mods-enabled symlinks
+  file: >
+    state=link
+    src={{ apache_server_root }}/mods-available/{{ item }}.load
+    dest={{ apache_server_root }}/mods-enabled/{{ item }}.load
+  with_items: apache_mods_enabled
+  notify: Restart Apache
+
+- name: Debian | Remove default Virtualhost
+  file: >
+    state="absent"
+    path="{{ apache_vhost_path }}/000-default.conf"
+
+- name: Debian | Supplemental configuration - vhosts.conf
+  template: >
+    src="vhosts24.conf.j2"
+    dest="{{ apache_vhost_path }}/vhosts.conf"
+    owner=root group=root mode=644
+  notify: Restart Apache
+

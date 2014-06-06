@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+Listen {{ apache.listen_port }}
+
+<IfModule ssl_module>
+    Listen {{ apache.listen_port_ssl }}
+</IfModule>
+
+<IfModule mod_gnutls.c>
+    Listen {{ apache.listen_port_ssl }}
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr et

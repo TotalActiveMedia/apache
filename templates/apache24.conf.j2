@@ -1,0 +1,85 @@
+# {{ ansible_managed }}
+
+# Global configuration, {{ apache_daemon }} 2.4
+
+ServerRoot "{{ apache_server_root }}"
+
+PidFile ${APACHE_PID_FILE}
+
+User ${APACHE_RUN_USER}
+Group ${APACHE_RUN_GROUP}
+
+Timeout {{ apache.timeout }}
+
+KeepAlive {{ apache.keepalive_enabled }}
+
+MaxKeepAliveRequests {{ apache.keepalive_max_requests }}
+KeepAliveTimeout {{ apache.keepalive_timeout }}
+
+MaxRequestWorkers {{ apache.mpm_maxrequestworkers }}
+MaxConnectionsPerChild {{ apache.mpm_maxconnectionsperchild }}
+
+Mutex file:${APACHE_LOCK_DIR} default
+
+# Include module configuration:
+IncludeOptional mods-enabled/*.load
+IncludeOptional mods-enabled/*.conf
+
+ServerName {{ ansible_hostname }}
+
+ExtendedStatus On
+<Location /server-status>
+    SetHandler server-status
+    Require host localhost
+</Location>
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+    Require all denied
+</Directory>
+
+<Directory /var/www/>
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Require all granted
+</Directory>
+
+AccessFileName {{ apache.accessfilename }}
+
+<FilesMatch "^\.ht">
+    Require all denied
+</FilesMatch>
+
+ErrorLog {{ apache_log_location }}/error.log
+LogLevel warn
+
+# Note that the use of %{X-Forwarded-For}i instead of %h is not recommended.
+# Use mod_remoteip instead.
+#
+LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined
+LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined
+LogFormat "%h %l %u %t \"%r\" %>s %O" common
+LogFormat "%{Referer}i -> %U" referer
+LogFormat "%{User-agent}i" agent
+
+# Custom: For use with Cloud LBs. xff_common is set below,
+#         xffp_common is not used by default, but just available
+#
+SetEnvIf  X-Forwarded-For "^.*\..*\..*\..*" XFF
+LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b" xff_common
+LogFormat "%{X-Forwarded-For}i %{X-Forwarded-Proto}i %l %u %t \"%r\" %>s %b" xffp_common
+
+CustomLog {{ apache_log_location }}/access_log combined env=!XFF
+CustomLog {{ apache_log_location }}/access_log xff_common env=XFF
+## End Custom logformat additions
+
+# Include list of ports to listen on
+Include ports.conf
+
+# FIXME: Deal with this
+#IncludeOptional conf-enabled/*.conf
+
+IncludeOptional sites-enabled/*.conf
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr et

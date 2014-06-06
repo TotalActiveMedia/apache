@@ -1,0 +1,35 @@
+---
+
+- name: RedHat | Install packages
+  yum: >
+    name={{ item }}
+    state=installed
+  with_items: apache_packages
+
+- name: RedHat | Main configuration
+  template: >
+    src="httpd22.conf.j2"
+    dest="{{ apache_server_root }}/conf/{{ apache_daemon }}.conf"
+  notify: Restart Apache
+
+- name: RedHat | Supplemental configuration - ports.conf
+  template: >
+    src="ports.conf.j2"
+    dest="{{ apache_vhost_path }}/ports.conf"
+    owner=root group=root mode=644
+  notify: Restart Apache
+
+- name: RedHat | Supplemental configuration - modules.conf
+  template: >
+    src="modules.conf.j2"
+    dest="{{ apache_vhost_path }}/modules.conf"
+    owner=root group=root mode=644
+  notify: Restart Apache
+
+- name: RedHat | Supplemental configuration - vhosts.conf
+  template: >
+    src="vhosts22.conf.j2"
+    dest="{{ apache_vhost_path }}/vhosts.conf"
+    owner=root group=root mode=644
+  notify: Restart Apache
+

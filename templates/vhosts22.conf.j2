@@ -1,0 +1,56 @@
+# {{ ansible_managed }}
+
+{% if apache_vhost_create_default or apache_vhosts %}  {# Apache 2.2-specific #}
+NameVirtualHost *:{{ apache.listen_port }}
+{% endif %}
+
+{% if apache_vhost_create_default %}
+### Default virtualhost ###
+<VirtualHost *:{{ apache.listen_port }}>
+    ServerName {{ ansible_hostname }}
+    DocumentRoot /var/www/html
+</VirtualHost>
+{% endif %}
+
+{# Set up VirtualHosts - servername and documentroot are required. #}
+{% if apache_vhosts.0 is defined %}
+{% for av in apache_vhosts %}
+### {{ av.servername }} ###
+<VirtualHost *:{{ apache.listen_port }}>
+
+    ServerName {{ av.servername }}
+{% if av.serveralias is defined %}
+    ServerAlias {% for sa in av.serveralias %} {{ sa }} {% endfor %}
+
+{% endif %}
+
+    DocumentRoot {{ av.documentroot }}
+{% if av.directoryindex is defined %}
+    DirectoryIndex {{ av.directoryindex }}
+{% endif %}
+
+{% if av.serveradmin is defined %}
+    ServerAdmin {{ av.serveradmin }}
+{% endif %}
+
+    CustomLog {{ apache_log_location }}/{{ av.servername }}_access.log combined env=!XFF
+    CustomLog {{ apache_log_location }}/{{ av.servername }}_access.log xff_common env=XFF
+    ErrorLog  {{ apache_log_location }}/{{ av.servername }}_error.log
+
+    <Directory "{{ av.documentroot }}">
+        AllowOverride All
+        Options -Indexes +FollowSymLinks
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+{% if av.extra_parameters is defined %}
+    # Extra parameters below
+{{ av.extra_parameters|indent(4, true) }}
+
+{% endif %}
+</VirtualHost>
+
+{% endfor %}
+{% endif %}
+# vim: syntax=apache ts=4 sw=4 sts=4 sr et

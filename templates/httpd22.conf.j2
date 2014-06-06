@@ -1,0 +1,108 @@
+# {{ ansible_managed }}
+
+# Global configuration, {{ apache_daemon }} 2.2
+
+ServerRoot "{{ apache_server_root }}"
+
+PidFile run/httpd.pid
+
+User apache
+Group apache
+
+Timeout {{ apache.timeout }}
+
+KeepAlive {{ apache.keepalive_enabled }}
+
+MaxKeepAliveRequests {{ apache.keepalive_max_requests }}
+KeepAliveTimeout {{ apache.keepalive_timeout }}
+
+# prefork MPM
+<IfModule prefork.c>
+    StartServers         {{ apache.mpm_prefork_startservers }}
+    MaxClients           {{ apache.mpm_prefork_maxclients }}
+    MinSpareServers      {{ apache.mpm_prefork_minspareservers }}
+    MaxSpareServers      {{ apache.mpm_prefork_maxspareservers }}
+    MaxRequestsPerChild  {{ apache.mpm_prefork_maxrequestsperchild }}
+    ServerLimit          {{ apache.mpm_prefork_serverlimit }}
+</IfModule>
+
+# worker MPM
+<IfModule worker.c>
+    StartServers         {{ apache.mpm_worker_startservers }}
+    MaxClients           {{ apache.mpm_worker_maxclients }}
+    MinSpareThreads      {{ apache.mpm_worker_minsparethreads }}
+    MaxSpareThreads      {{ apache.mpm_worker_maxsparethreads }}
+    MaxRequestsPerChild  {{ apache.mpm_worker_maxrequestsperchild }}
+    ThreadsPerChild      {{ apache.mpm_worker_threadsperchild }}
+    #ServerLimit         {{ apache.mpm_worker_serverlimit }}
+</IfModule>
+
+ServerName {{ ansible_hostname }}
+
+ExtendedStatus On
+<Location /server-status>
+    SetHandler server-status
+    Order deny,allow
+    Deny from all
+    Allow from localhost
+</Location>
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>
+
+<Directory "/var/www/html">
+    Options +Indexes FollowSymLinks
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+AccessFileName {{ apache.accessfilename }}
+
+<Files ~ "^\.ht">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</Files>
+
+TypesConfig /etc/mime.types
+
+# trox: FIXME okay for scripts? o.O disabled in 2.4
+DefaultType text/plain
+
+<IfModule mod_mime_magic.c>
+#   MIMEMagicFile /usr/share/magic.mime
+    MIMEMagicFile conf/magic
+</IfModule>
+
+ErrorLog {{ apache_log_location }}/error_log
+LogLevel warn
+
+#
+# The following directives define some format nicknames for use with
+# a CustomLog directive (see below).
+#
+LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+LogFormat "%{Referer}i -> %U" referer
+LogFormat "%{User-agent}i" agent
+
+# Custom: For use with Cloud LBs. xff_common is set below,
+#         xffp_common is not used by default, but just available
+#
+SetEnvIf  X-Forwarded-For "^.*\..*\..*\..*" XFF
+LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b" xff_common
+LogFormat "%{X-Forwarded-For}i %{X-Forwarded-Proto}i %l %u %t \"%r\" %>s %b" xffp_common
+
+CustomLog {{ apache_log_location }}/access_log combined env=!XFF
+CustomLog {{ apache_log_location }}/access_log xff_common env=XFF
+## End Custom logformat additions
+
+Include conf.d/*.conf
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr et

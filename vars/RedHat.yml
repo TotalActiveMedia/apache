@@ -1,0 +1,14 @@
+---
+apache_daemon: httpd
+apache_server_root: /etc/httpd
+apache_log_location: /var/log/httpd
+apache_vhost_path: /etc/httpd/conf.d
+apache_default_owner: apache
+apache_default_group: apache
+
+apache_packages:
+  - httpd
+apache_mods_loaded:
+
+
+# vim: syntax=ansible ts=2 sw=2 sts=2 sr et
