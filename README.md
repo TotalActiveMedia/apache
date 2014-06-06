@@ -3,7 +3,7 @@ apache
 
 This role installs and configures Apache
 
-[![Build Status](https://drone-opsdev.rax.io/github.com/rack-roles/base/status.svg?branch=master)](https://drone-opsdev.rax.io/github.com/rack-roles/base)
+[![Build Status](https://drone-opsdev.rax.io/github.com/rack-roles/apache/status.svg?branch=master)](https://drone-opsdev.rax.io/github.com/rack-roles/apache)
 
 Requirements
 ------------
