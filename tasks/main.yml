@@ -7,6 +7,9 @@
   when: ansible_os_family == "RedHat" and ansible_distribution_version|int == 6
 
 - include: Debian-Apache2.4.yml
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "12.04"
+
+- include: Debian-Apache2.4.yml
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "13.10"
 
 - include: Debian-Apache2.4.yml
