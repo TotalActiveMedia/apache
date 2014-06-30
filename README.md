@@ -44,6 +44,7 @@ Role Variables
 
 * `apache_vhosts`: List of virtual hosts.
 
+#### Example Apache Vhost
 ```
 apache_vhosts:
   servername: "example.com"
