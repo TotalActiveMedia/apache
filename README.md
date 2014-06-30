@@ -47,12 +47,13 @@ Role Variables
 #### Example Apache Vhost
 ```
 apache_vhosts:
-  servername: "example.com"
-  serveralias: "www.example.com"
-  documentroot: "/var/www/html/vhosts/example.com"
-  directoryindex: "index.php"
-  serveradmin: "webmaster@example.com"
-  extra_parameters: "Directive values"
+  - servername: "example.com"
+    serveralias: "www.example.com"
+    documentroot: "/var/www/html/vhosts/example.com"
+    directoryindex: "index.php"
+    serveradmin: "webmaster@example.com"
+    extra_parameters: "Directive values"
+  - servername: ...
 ```
 
 Dependencies
