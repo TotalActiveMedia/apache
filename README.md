@@ -48,7 +48,8 @@ Role Variables
 ```
 apache_vhosts:
   - servername: "example.com"
-    serveralias: "www.example.com"
+    serveralias:
+      - "www.example.com"
     documentroot: "/var/www/html/vhosts/example.com"
     directoryindex: "index.php"
     serveradmin: "webmaster@example.com"
