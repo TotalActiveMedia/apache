@@ -5,6 +5,15 @@
     name={{ item }}
     state=installed
   with_items: apache_packages
+  when: ansible_distribution != "Debian"
+
+- name: Debian | Install testing packages
+  apt: >
+    name={{ item }}
+    state=installed
+    default_release=testing
+  with_items: apache_packages
+  when: ansible_distribution == "Debian" 
 
 - name: Debian | Main configuration
   template: >

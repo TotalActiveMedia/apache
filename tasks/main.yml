@@ -15,6 +15,9 @@
 - include: Debian-Apache2.4.yml
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
 
+- include: Debian-Apache2.4.yml
+  when: ansible_distribution == "Debian"
+
 - name: Create DocumentRoots
   file: >
     state=directory
